@@ -1,0 +1,5 @@
+Determine a host to run Server file. Both users need to run the client file and for LAN enter the ipv4 address of the device running the server into the ip text field. 
+
+For WAN servers the server host will need to either forward the port 4445 using tcp or both users need to install a third party VPN tunnel to host a virtual LAN. Then both players will have to enter the ipv4 address of the device running the server into the ip text field.
+
+Enjoy the game!
