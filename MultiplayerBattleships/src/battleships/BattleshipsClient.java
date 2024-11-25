@@ -1,7 +1,5 @@
 package battleships;
 
-// A simple Client Server Protocol .. Client for Echo Server
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,40 +10,52 @@ import java.net.UnknownHostException;
 import javax.swing.JOptionPane;
 
 public class BattleshipsClient  {
-    Socket s1 = null;
-    String line = "";
-    BufferedReader br = null;
-    BufferedReader is = null;
-    PrintWriter os = null;
-    InetAddress address = null;
-    GameScreen d = null;
-    SignUp su = null;
-    String clientName;
+    private Socket s1 = null;
+    private String line = "";
+    private BufferedReader br = null; // User input 
+    private BufferedReader is = null; // Server message
+    private PrintWriter os = null; // Message to send to server
+    private InetAddress address = null;
+    private GameScreen gameScreen = null;
+    private SignUp su = null;
+    private String clientName;
 
 
     public BattleshipsClient(){
-        try {
+        try{
+	    // Getting InetAddress from user
             address=InetAddress.getByName(JOptionPane.showInputDialog("Enter IP (for main server)"));
         } catch (UnknownHostException e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         }
     
     
         try {
-            s1=new Socket(address, 4445); // You can use static final constant PORT_NUM
+	    // Connecting to address on port 4445, can change if port not available, server
+	    // will need to change port as well.
+            s1=new Socket(address, 4445);
+
+	    // Assigning br to take user input 
             br= new BufferedReader(new InputStreamReader(System.in));
+
+	    // Assigning is to be input stream from server 
             is=new BufferedReader(new InputStreamReader(s1.getInputStream()));
+
+	    // Assigning os to be output stream to server
             os= new PrintWriter(s1.getOutputStream());
         }
         catch (IOException e){
-            e.printStackTrace();
+            // Probably not the best to lump all of these together but is what
+	    // it is
+	    e.printStackTrace();
             System.err.print("IO Exception");
         }
 
+	// Echoing some stuff
         System.out.println("Client Address : "+address);
         System.out.println("Enter Data to echo Server ( Enter QUIT to end):");
 
+	// Begining user login stage
         su = new SignUp(this);
         LogIn();
     }
@@ -59,8 +69,6 @@ public class BattleshipsClient  {
     
         String[] response;
         try{
-            //br.readLine(); 
-            //////////////////////////////////////////////////////////////////////////////////////////////
             boolean verifiedUser = false;
             while(verifiedUser == false){
 
@@ -94,12 +102,10 @@ public class BattleshipsClient  {
     }
 
     
-    public void GameScreenComs(GameScreen d){
-
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void GameScreenComs(GameScreen gameScreen){
             String[] response;
             System.out.println("say hi to server");
-            d.updateInstruction("Say hi to the server!");
+            gameScreen.updateInstruction("Say hi to the server!");
             try{
             while(line.compareTo("QUIT")!=0){
                 System.out.println("preread");
@@ -109,45 +115,42 @@ public class BattleshipsClient  {
                 response = out.split("#");
             
                 if(response[0].equals("cout")){
-                    d.updateConsole(response[1]);
+                    gameScreen.updateConsole(response[1]);
                 }else if(response[0].equals("disp")){
-                    d.updateDisplay(response[1]);
+                    gameScreen.updateDisplay(response[1]);
                 }else if(response[0].equals("ins")){
-                    d.updateInstruction(response[1]);
+                    gameScreen.updateInstruction(response[1]);
                 }else if(response[0].equals("sout")){
                     System.out.println(response[1]);
                 }else if(response[0].equals("hcout")){
-                    d.setPlayerList(response[1]);
+                    gameScreen.setPlayerList(response[1]);
                 }else if(response[0].equals("userIn")){
                     boolean nullAns = true;
                     while(nullAns){
-                        line=d.waitForEnter();
+                        line=gameScreen.waitForEnter();
                         if(line!=null){
                             nullAns = false;
                         }
                     }
                     os.println(/*"reply#" + */line);
                     os.flush();
-                    d.clearTextIn();
+                    gameScreen.clearTextIn();
                 
                 }else if(response[0].equals("placeShip")){
                     System.out.println("placing ship icon");
-                    d.placeShip(Integer.parseInt(response[1]), Integer.parseInt(response[2]), Integer.parseInt(response[3]), Integer.parseInt(response[4]), Integer.parseInt(response[5]));
+                    gameScreen.placeShip(Integer.parseInt(response[1]), Integer.parseInt(response[2]), Integer.parseInt(response[3]), Integer.parseInt(response[4]), Integer.parseInt(response[5]));
 
                 }else if(response[0].equals("shipNum")){
                     
-                    d.setShipNum(Integer.parseInt(response[1]));
+                    gameScreen.setShipNum(Integer.parseInt(response[1]));
                 }else if(response[0].equals("nodeNum")){
                     
-                    d.setNodeNum(Integer.parseInt(response[1]));
+                    gameScreen.setNodeNum(Integer.parseInt(response[1]));
                 }else if(response[0].equals("hitNode")){
                     
-                    d.destroyNode(Integer.parseInt(response[1]), Integer.parseInt(response[2]));
+                    gameScreen.destroyNode(Integer.parseInt(response[1]), Integer.parseInt(response[2]));
                 }
             }
-                //System.out.println("Server Response : "+response[1]);
-                //d.updateInstruction("Server Response : "+response[1]);
-                //line=br.readLine();
             }catch(Exception e){
                 System.out.println("readline error");
             }
@@ -167,7 +170,6 @@ public class BattleshipsClient  {
                     s1.close();
                     System.out.println("Connection Closed");
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 
